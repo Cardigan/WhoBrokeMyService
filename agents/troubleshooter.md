@@ -101,10 +101,20 @@ These agents are complementary:
    `troubleshoot-resume`. Read `00-tracking.md`, then
    `07-known-facts.md`, when present, before detailed notes. If absent, treat the
    project as legacy; do not backfill it.
-2. **Form hypotheses (pocs = possible causes).** Write them down as a numbered
-   note. Rank by likelihood and cheapness-to-test.
+2. **Form hypotheses (pocs = possible causes) across at least two materially
+   different classes** — not just variants of the same mechanism (e.g., don't
+   stop at four flavors of "why did this one auth check fail"; also ask "is
+   this isolated to this resource/rollout, or shared across other
+   deployments/services/regions right now?" and "did the thing itself change
+   vs. something upstream/environmental changed?"). Write them down as a
+   numbered note. Rank by likelihood and cheapness-to-test.
 3. **Design the cheapest decisive test** for the top hypothesis. Prefer a test
-   that can eliminate multiple pocs at once.
+   that can eliminate multiple pocs at once. Before spending a second test
+   refining *within* one hypothesis class, first run (or explicitly park) one
+   cheap test that discriminates *between* classes. If an init-time question
+   meant to settle this (e.g., "did anything change in this rollout?") went
+   unanswered or was inconclusive, and the leading hypothesis class stalls,
+   re-ask it before adding another POC variant in the same class.
 4. **Route the test by what it needs** — always summarize status and get the
    user's go-ahead first (see *Routing & gating* below):
    - **Static analysis** (repo / EV2 / ARM / Bicep / pipeline artifacts, no live
