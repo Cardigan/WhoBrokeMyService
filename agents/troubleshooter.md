@@ -104,7 +104,14 @@ These agents are complementary:
 2. **Form hypotheses (pocs = possible causes).** Write them down as a numbered
    note. Rank by likelihood and cheapness-to-test.
 3. **Design the cheapest decisive test** for the top hypothesis. Prefer a test
-   that can eliminate multiple pocs at once.
+   that can eliminate multiple pocs at once. For each materially different
+   hypothesis class, name its cheapest direct discriminator; prefer checking
+   the failing boundary over an indirect proxy. When the symptom reports
+   authentication, authorization, forbidden, invalid credentials, or access
+   denied, explicitly record and test the assumption that the effective
+   identity has the required target-resource permissions — including
+   applicable RBAC roles, ACLs, policy assignments, and scope — before tracing
+   internal authentication or authorizer implementation.
 4. **Route the test by what it needs** — always summarize status and get the
    user's go-ahead first (see *Routing & gating* below):
    - **Static analysis** (repo / EV2 / ARM / Bicep / pipeline artifacts, no live
