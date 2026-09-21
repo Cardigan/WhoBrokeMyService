@@ -1,17 +1,20 @@
-# Troubleshooter Agent + Skills
+# Troubleshooting Toolkit
 
 A disciplined, note-keeping troubleshooting workflow for the GitHub Copilot CLI.
-It pairs one **agent** that runs the investigation loop with four **skills** it
-orchestrates. All durable state lives in a per-project `.ai` folder so an
-investigation can be paused and resumed across sessions (and across models).
+It combines four **skills** with four **agents**. Active investigation state lives
+in a per-project `.ai` folder so work can pause and resume across sessions and
+models.
 
 ## What's included
 
 | Component | Type | Purpose |
 | --- | --- | --- |
 | `agents/troubleshooter.md` | Agent | Investigation lead. Runs a hypothesis → test → record loop, keeps `.ai` notes, gates work behind the user, arms failsafes against runaway loops, and orchestrates the skills below. |
-| `skills/troubleshoot-init` | Skill | Scaffolds the `.ai` folder for a **new** investigation — the 7 standard notes (`00`–`06`) with templates. |
-| `skills/troubleshoot-start-session` | Skill | Catches a **fresh conversation** up on an **existing** investigation by reading `.ai` notes, asking what changed, and reporting next steps. |
+| `agents/troubleshooting-context-auditor.md` | Agent | Audits whether evidence matches the failing product path and corrects overconfident conclusions. |
+| `agents/troubleshooting-control-diff.md` | Agent | Finds the nearest working control and proposes the smallest decisive A/B test. |
+| `agents/troubleshooting-retrospective.md` | Agent | Reviews a verified investigation to improve future troubleshooting workflow. |
+| `skills/troubleshoot-init` | Skill | Scaffolds the `.ai` folder for a **new** investigation — the 8 standard notes (`00`–`07`) with templates. |
+| `skills/troubleshoot-resume` | Skill | Catches a **fresh conversation** up on an **existing** investigation using relevance-ranked known facts. |
 | `skills/troubleshoot-second-opinion` | Skill | Spins up a review agent (user picks the model) to critique the reasoning in the `.ai` folder, update the notes, and report back. |
 | `skills/troubleshoot-code-review-agents` | Skill | Triages open next-steps into "answerable by static code review" vs. not, then dispatches code-review agents to chase the static items and write findings back to `.ai`. |
 
@@ -20,9 +23,12 @@ investigation can be paused and resumed across sessions (and across models).
 ```
 troubleshooter (agent)
   ├── new project?      → troubleshoot-init
-  ├── resuming?         → troubleshoot-start-session
+  ├── resuming?         → troubleshoot-resume
   ├── stuck / high-stakes? → troubleshoot-second-opinion
-  └── static-analysis work? → troubleshoot-code-review-agents
+  ├── static-analysis work? → troubleshoot-code-review-agents
+  ├── conflicting evidence? → troubleshooting-context-auditor
+  ├── working comparison?   → troubleshooting-control-diff
+  └── verified resolution?  → troubleshooting-retrospective
         (all read/write the project's .ai folder)
 ```
 
@@ -36,12 +42,13 @@ test.
 
 Every investigation keeps its state in a `.ai/` folder inside the project:
 
-- Numbered notes, e.g. `00-tracking.md`, `01-context.md`, `02-hypotheses.md`,
-  `05-next-steps.md`, …
+- Living notes `00`–`07`, including assumptions and relevance-ranked known facts.
+- Detailed investigation notes start at `08`.
 - `00-tracking.md` is the table of contents + open-loops roadmap; it's refreshed
   after every note and at session end.
-- Entries are dated and signed with the model name; previous entries are appended
-  to, not rewritten.
+- Entries are dated and signed with the model name; useful evidence is preserved.
+- The schema is for active investigation, not archival. After closure, `00`, `01`,
+  and `03` carry the durable summary.
 
 `troubleshoot-init` is the source of truth for the exact file layout and
 templates.
@@ -57,7 +64,7 @@ troubleshooting toolkit into my Copilot CLI so it's available to me.
 
 The repo contains:
 - `skills/` — four `troubleshoot-*` skills, each its own folder with a SKILL.md
-- `agents/troubleshooter.md` — the troubleshooter agent
+- `agents/` — the troubleshooter plus three specialist agents
 - `.github/instructions/instructions.md` — `.ai` folder conventions the agent
   and skills rely on
 
@@ -89,11 +96,15 @@ Copy-Item -Force          .\agents\*  "$env:USERPROFILE\.copilot\agents\"
   agent). It will scaffold `.ai/` and ask how much interaction you want
   (Guided / Supervised / Autonomous).
 - **Resume later:** in a new session, ask it to "catch up on this investigation"
-  (`troubleshoot-start-session`).
+  (`troubleshoot-resume`).
 - **Sanity-check a conclusion:** ask for a "second opinion"
   (`troubleshoot-second-opinion`).
 - **Chase static items:** ask which next-steps can be answered by code review
   (`troubleshoot-code-review-agents`).
+- **Audit context equivalence:** invoke `troubleshooting-context-auditor`.
+- **Find the nearest working control:** invoke `troubleshooting-control-diff`.
+- **Review the process after a verified fix:** invoke
+  `troubleshooting-retrospective`.
 
 ## Notes / dependencies
 
@@ -105,3 +116,5 @@ Copy-Item -Force          .\agents\*  "$env:USERPROFILE\.copilot\agents\"
 - Interaction modes, failsafes (time watchdog, iteration cap, no-progress
   detector, bounded waits), and the kill-switch / "Running Processes" tracking
   are all defined in `agents/troubleshooter.md`.
+- `07-known-facts.md` is the active investigation's relevance-ranked evidence
+  index. Legacy investigations are not retrofitted.

@@ -9,7 +9,7 @@ description: >
 
 ## Overview
 
-This skill scaffolds a `.ai` investigation folder inside a troubleshooting project directory. It creates the 7 standard documents (00–06) with proper templates, then walks the user through getting started.
+This skill scaffolds a `.ai` investigation folder inside a troubleshooting project directory. It creates the 8 standard documents (00–07) with proper templates, then walks the user through getting started.
 
 ## When to invoke
 
@@ -31,12 +31,14 @@ After determining the project folder, prompt the user for these (use `ask_user` 
 2. **Environment** — "What environment/region is this in?" (e.g., "US Gov Canary", "Prod East US", etc.)
 3. **Key identifiers** — "Any IDs to track? (gateway ID, tenant, session, incident #, etc.)" — freeform, optional
 4. **Any initial hypotheses?** — "Do you already suspect something?" — freeform, optional
+5. **Failing execution context** — "Where does the failing operation actually run?" Include host/container, process identity, endpoint, and environment if known — freeform, optional
+6. **Nearest working control** — "What is the closest similar context where the same operation works?" — freeform, optional
 
 These answers populate the templates so they're useful from the start, not just empty skeletons.
 
 ## What to create
 
-Create the `.ai/` directory and these 7 files inside it. Use the gathered context to fill in headers and initial content.
+Create the `.ai/` directory and these 8 files inside it. Use the gathered context to fill in headers and initial content.
 
 ### 00-tracking.md
 
@@ -59,6 +61,7 @@ Create the `.ai/` directory and these 7 files inside it. Use the gathered contex
 | 04 | [04-trace-analysis.md](04-trace-analysis.md) | Trace/log walkthrough and raw data analysis |
 | 05 | [05-next-steps.md](05-next-steps.md) | Prioritized next steps and unanswered questions |
 | 06 | [06-assumptions.md](06-assumptions.md) | Tracked assumptions with verification status |
+| 07 | [07-known-facts.md](07-known-facts.md) | Primary relevance-ranked facts and test results with confidence |
 
 ---
 
@@ -306,6 +309,55 @@ _Log assumptions here as you become aware of making them during analysis — in 
 ​```
 ```
 
+### 07-known-facts.md
+
+```markdown
+# 07 — Known Facts
+
+**Date:** <today's date>
+**Model:** <model name>
+**Purpose:** Primary source of truth for later reasoning and new sessions
+
+---
+
+## Usage rules
+
+- Track only observed or strongly supported facts, not hypotheses.
+- Sort by current relevance to the terminal failure, highest first.
+- Keep each entry short enough to scan quickly.
+- Record the exact execution context. Nearby contexts are not equivalent.
+- Include what the evidence proves and what it does not prove.
+- Update confidence or relevance when later evidence changes interpretation.
+- Link detailed notes rather than copying large evidence dumps.
+
+## Execution-context matrix
+
+| Context | Environment | Host/container | Process/identity | Endpoint/SNI | Store/cache/network namespace | Result | Source |
+|---|---|---|---|---|---|---|---|
+| Failing product path | <environment> | <failing context or TBD> | <process/identity or TBD> | <endpoint/SNI or TBD> | TBD | <symptom> | User report |
+| Nearest working control | <nearest working control or TBD> | TBD | TBD | TBD | TBD | TBD | User report |
+
+## Known facts
+
+| Rank | Fact / short test result | Confidence | Relevance | Context | Proves | Does not prove | Source |
+|---|---|---|---|---|---|---|---|
+| 1 | <problem statement / terminal symptom> | High | Direct | <exact or TBD> | The observed failure exists | Root cause | [01](01-initial-findings.md) |
+
+**Confidence:** High = directly observed/reproduced; Medium = supported but context or causality gap remains; Low = weak proxy or incomplete provenance.
+
+## Evidence gaps
+
+| Missing fact | Why it matters | Cheapest way to obtain it |
+|---|---|---|
+| Exact failing execution context | Prevents nearby-context tests from being overgeneralized | Trace product request/process/container |
+
+## Changelog
+
+​```
+<today's date> - <model name> - Created from troubleshoot-init
+​```
+```
+
 ## After scaffolding — teach the user
 
 After creating all files, display this guide to the user:
@@ -329,11 +381,12 @@ Here's how this works:
 | `04-trace-analysis.md` | Detailed log/trace walkthroughs with queries used. |
 | `05-next-steps.md` | **What to do next.** Prioritized actions and open questions. |
 | `06-assumptions.md` | Things we believe but haven't verified. Check here when something doesn't add up. |
+| `07-known-facts.md` | **Read after 00.** Relevance-ranked facts, test summaries, context, confidence, and evidence limits. |
 
 **How to work with me:**
 - Drop evidence files into the project folder and ask me to review them
 - Ask me to **update the .ai folder** after we discuss findings
-- I'll add new numbered notes (07+) as the investigation grows
+- I'll keep `07-known-facts.md` current and add new detailed notes starting at 08
 - Say **"what's next?"** and I'll check `05-next-steps.md`
 
 **Ready to start?** Drop some evidence into the folder and tell me to review it, or describe what you're seeing.
@@ -344,8 +397,12 @@ Here's how this works:
 
 - `poc` means **possible cause**, not proof of concept.
 - Each note gets a date and model name.
-- **Notes 00–06 are living documents** — edit, reorganize, and re-label them freely to keep them readable. Docs 07+ are log-like but also editable.
+- **Notes 00–07 are living documents.** `07-known-facts.md` is the primary reasoning input after `00-tracking.md`; keep it concise, relevance-ranked, and current. Detailed log-like notes start at 08.
 - **Log assumptions in `06-assumptions.md`** whenever you notice you're making one. Don't exhaustively enumerate — just capture the ones you're aware of. The user reviews this doc to catch bad assumptions, and it's where we double-check when we run out of leads.
+- Before accepting a test result, record its context and state both what it proves and what it does not prove.
+- Prefer the nearest working control and change one context dimension at a time.
+- Apply this schema only to new investigations. Do not retrofit or rewrite closed investigations.
+- The `.ai` schema is an investigation workspace, not an archive. After closure, consolidate durable value into `00-tracking.md`, `01-initial-findings.md`, and `03-root-cause-analysis.md`. The other notes remain working history but are not required reading after the event.
 - **Never delete useful info.** Keep busted hypotheses and assumptions (mark them wrong + why). Offload large unwanted chunks to another `.ai` doc instead of deleting.
 - Sign edits with: `[Date] - [Model Name] - [Description]`
 - The full conventions are in `.github/instructions/instructions.md` — always follow those for ongoing maintenance of the `.ai` folder.

@@ -46,7 +46,7 @@ Determine the `.ai` folder and the next-steps note to triage:
 Verify the folder exists and contains numbered notes (`00-tracking.md`, etc.). If it
 does not, tell the user and suggest `troubleshoot-init` first. Do not scaffold here.
 
-Read the next-steps note (and skim `00-tracking.md` for context).
+Read the next-steps note and `00-tracking.md`. For investigations created with the current schema, also read `07-known-facts.md`. Do not create or backfill it in legacy investigations.
 
 ## Step 2 — Triage actions and questions
 
@@ -60,6 +60,18 @@ Classify every action and question in the next-steps note into three buckets:
 - **❌ Not code-review** — requires live cloud queries, on-node access, or a human
   decision (deploy/apply, map live node→instance, run `dotnet --list-runtimes` on a
   box, retry/remove-node decisions, waiting on a coworker).
+
+Before dispatch, apply this decision rule:
+
+- **Static review can establish:** code paths, policy mechanics, defaults,
+  configuration ownership, provisioning/import/startup wiring, and possible
+  branches.
+- **Static review cannot establish:** the effective runtime value, exact failing
+  request, process/container store contents, cache state, network namespace, or
+  whether a mechanism actually fired.
+
+Do not dispatch an agent to answer a live-only question indirectly. State the
+exact live discriminator instead.
 
 Present this triage to the user as a compact table before dispatching anything, so
 they can confirm or adjust scope. Note the key access caveat: a code-review agent can
@@ -126,7 +138,15 @@ context) and include:
    file paths + line numbers. Do NOT run live cloud commands, do NOT attempt on-node
    access, do NOT make deployment changes. If the answer genuinely requires the live
    system, say so and stop rather than guessing.
-5. **The `.ai` folder conventions** for any notes it writes (these come from the
+5. **Context and causality guardrails**:
+   - Read `07-known-facts.md` before forming conclusions when it exists.
+   - Trace product-path equivalence: exact request/operation, endpoint, process,
+     host/container, identity, and validation policy.
+   - Distinguish "the mechanism exists" from "the mechanism fired."
+   - Identify the nearest working control and the smallest configuration or
+     provisioning difference visible statically.
+   - For each finding, state what it proves and what it does not prove.
+6. **The `.ai` folder conventions** for any notes it writes (these come from the
    workspace `instructions.md`):
    - `poc` means **possible cause**, not proof of concept.
    - Each note is a numbered file `NN-title.md`; the number increments. Add a **new**
@@ -141,7 +161,9 @@ context) and include:
      dated signed updates), and add a changelog line. Keep `00-tracking.md` a roadmap
      (links + brief descriptions), not detailed analysis.
    - Use clear headings and bullets; cite evidence (file:line).
-6. **A deliverable instruction**: return a concise report stating, for each assigned
+   - Update `07-known-facts.md` only when it already exists and only with facts established by the review. Include
+    confidence, context, proves/does-not-prove, source, and relevance rank.
+7. **A deliverable instruction**: return a concise report stating, for each assigned
    item, the answer (or "needs live system, can't answer statically"), the supporting
    evidence (file paths + lines), and exactly which `.ai` files it created or edited.
 
@@ -173,3 +195,6 @@ When agent(s) finish (use `read_agent` after each completion notification):
   have each write its own numbered note so they don't collide.
 - Respect the workspace rule that reverse-engineering internal formats is a red flag —
   if an item would require that, flag it and ask rather than hacking around it.
+- Prefer a **working-control diff agent** when a passing environment/context exists.
+  Its job is to compare provisioning and effective code/config dimensions, not to
+  brainstorm unrelated causes.

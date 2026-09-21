@@ -23,7 +23,7 @@ The goal is an honest second opinion: confirm what holds up, challenge weak assu
 
 Determine the `.ai` folder to review:
 
-1. If the user referenced a folder or project (e.g., `@justNotes\Projects\0601-deployment-failure\.ai\`), use that.
+1. If the user referenced a folder or project (e.g., `@justNotes\Projects\0601-ppvnet-deployment-failure\.ai\`), use that.
 2. If the path points at a project folder, append `.ai`.
 3. If nothing is given, use `ask_user` to ask for the project folder or `.ai` path.
 
@@ -61,20 +61,29 @@ Launch a sub-agent with the `task` tool:
 Give the agent a complete, self-contained prompt (it does not share your context). The prompt must include:
 
 1. **The absolute path** to the `.ai` folder under review.
-2. **The task**: read every numbered note, understand the current problem statement, hypotheses, evidence, RCA, assumptions, and next steps.
-3. **The critique mandate** — be a skeptical peer reviewer, not a cheerleader:
+2. **The task**: read `00-tracking.md` and, when present, `07-known-facts.md` first, then every numbered note needed to understand the current problem statement, hypotheses, evidence, RCA, assumptions, and next steps. If 07 is absent, treat the project as legacy and follow its existing structure. Do not backfill, renumber, or rewrite it.
+3. **The critique mandate** — use Skeptical, Optimistic, and Judge perspectives:
+   - Skeptical attacks assumptions, context equivalence, causality, weak negative evidence, and confirmation bias.
+   - Optimistic identifies what holds up and which practices should be retained.
+   - Judge balances both, makes the final assessment, and is the only perspective allowed to edit the `.ai` folder.
    - Check whether the leading hypothesis is actually supported by the cited evidence.
    - Look for logic gaps, unjustified leaps, conflated correlation/causation, and confirmation bias.
    - Flag assumptions marked "Verified" that are really only "Assumed," and vice versa.
    - Surface plausible alternative causes that were dismissed too early or never considered.
    - Note any evidence that contradicts the current conclusion.
    - Call out the single highest-value next check that would most cheaply confirm or kill the leading theory.
+   - Identify the nearest working control and the comparison with the fewest differing execution-context dimensions.
+   - Reject "the mechanism exists in code" as proof that it fired at runtime.
+   - Review decisive tests for exact host/container, process identity, endpoint/SNI, store/cache/network namespace, and validation policy.
+   - Require every finding to state what it proves and what it does not prove.
+   - Apply a red-herring budget: after two failed causal discriminators or absent request correlation, park the lead until direct evidence appears.
 4. **The .ai folder conventions** the agent MUST follow when writing (these come from the workspace `instructions.md`):
    - `poc` means **possible cause**, not proof of concept.
    - Each note is a numbered file: `NN-title.md`; the number increments with each new note. Add a **new** note for the second opinion (the next free number, e.g. `12-second-opinion-<model>.md`) rather than rewriting existing analysis.
    - Prefer adding new notes/sections over editing prior entries. If an existing entry is updated, leave the original text and add a dated, signed correction — do not silently overwrite.
    - Every new section/note gets a date and the **model name** that generated it. Sign edits as `YYYY-MM-DD - <model name> - <description>`.
    - Update `00-tracking.md`: add the new note to the table of contents, refresh open loops / open questions / current hypothesis if the review changes them, and add a changelog line. Keep `00-tracking.md` a roadmap (links + brief descriptions), not detailed analysis.
+   - Update `07-known-facts.md` when it exists: preserve established facts across sessions, re-rank them by relevance, and correct confidence/context/proves limits when needed.
    - Use clear headings and bullet points; keep notes on-topic.
 5. **A deliverable instruction**: at the end, the agent returns a concise report covering: what holds up, what is weak or wrong, what's missing, the recommended next step, and exactly which files it created or edited.
 
@@ -99,4 +108,5 @@ Keep your summary tight — surface the signal (bugs in the logic, missed causes
 - This skill **reviews and improves** an existing investigation; it does not start one. For a brand-new investigation, use `troubleshoot-init`.
 - The reviewer should be willing to disagree. A second opinion that only validates the first is low value — instruct the agent accordingly.
 - Never delete prior analysis. The audit trail of how the thinking evolved is part of the value.
+- When multiple perspectives or agents are used, keep Skeptical and Optimistic reviewers read-only; the Judge is the only writer.
 - If the user wants more than one second opinion, you can launch multiple review agents (different models) in parallel; have each write its own numbered note so they don't collide.

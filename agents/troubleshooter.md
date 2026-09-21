@@ -32,7 +32,7 @@ can pick the project back up later.
 (`~/.copilot/skills/troubleshoot-init/SKILL.md`) so you use its exact `.ai`
 folder structure, templates, and conventions — it is the source of truth, not
 this file. Also note the other `troubleshoot-*` skills below. The `.ai` rules,
-file layout (00–06), and maintenance conventions all live in that skill and in
+file layout (00–07), and maintenance conventions all live in that skill and in
 `.github/instructions/instructions.md`; **defer to them** and don't reinvent or
 contradict them here.
 
@@ -62,7 +62,7 @@ re-invoke a running skill):
 
 - **troubleshoot-init** — first thing for a brand-new investigation. Creates the
   `.ai` folder and `00-tracking.md`.
-- **troubleshoot-start-session** — at the start of a fresh conversation on an
+- **troubleshoot-resume** — at the start of a fresh conversation on an
   existing project. Reads `.ai` notes, asks catch-up questions, reports next
   steps.
 - **troubleshoot-second-opinion** — occasionally, to have another model critique
@@ -71,11 +71,36 @@ re-invoke a running skill):
 - **troubleshoot-code-review-agents** — when next-steps can be answered purely by
   static code review (reading repo/EV2/ARM/Bicep/pipeline artifacts, no live
   cloud). Use the `task` tool's `code-review` agent for change-diff reviews.
+- **troubleshooting-retrospective agent** — suggest after root cause and a
+  positive end-to-end fix are verified. It reviews what worked, what slowed
+  convergence, and how skills/agents should improve. Invoke with
+  `/agent troubleshooting-retrospective`.
+
+## Specialist agents
+
+- **troubleshooting-control-diff** — use when the scenario works in one or more
+  other contexts, when broad environment comparisons are noisy, or when several
+  causes remain. It selects the nearest working control, produces a
+  dimension-by-dimension diff, and proposes a one-variable A/B. Invoke with
+  `/agent troubleshooting-control-diff`.
+- **troubleshooting-context-auditor** — use after conflicting results, before
+  killing a major branch, during a difficult resume, or before declaring root
+  cause. It grades evidence as exact/near/proxy/adjacent and corrects confidence
+  based on context and request causality. Invoke with
+  `/agent troubleshooting-context-auditor`.
+
+These agents are complementary:
+
+1. The context auditor identifies which evidence is not equivalent.
+2. The control-diff agent finds the closest passing comparison and the smallest
+   test to close that gap.
 
 ## The loop
 
 1. **Orient.** Is this new or existing? New → `troubleshoot-init`. Existing →
-   `troubleshoot-start-session`. Read `00-tracking.md` first to find open loops.
+   `troubleshoot-resume`. Read `00-tracking.md`, then
+   `07-known-facts.md`, when present, before detailed notes. If absent, treat the
+   project as legacy; do not backfill it.
 2. **Form hypotheses (pocs = possible causes).** Write them down as a numbered
    note. Rank by likelihood and cheapness-to-test.
 3. **Design the cheapest decisive test** for the top hypothesis. Prefer a test
@@ -89,10 +114,15 @@ re-invoke a running skill):
    - **Needs the user** (run a command on their machine, check a portal, confirm
      a fact only they know) → use `ask_user` with the exact step and what output
      to paste back.
-5. **Record the result** in the `.ai` folder. Update `00-tracking.md`.
+5. **Record the result** in the `.ai` folder. Update `00-tracking.md` and
+   `07-known-facts.md` when present.
 6. **Decide:** confirmed → narrow further; refuted → next hypothesis; stuck →
    `troubleshoot-second-opinion`.
 7. **Repeat** until root cause is established and verified.
+
+After every result, update each active branch as strengthened, weakened,
+unchanged, or killed. Do not promote a cause merely because its mechanism
+exists.
 
 ## Routing & gating (every iteration of the loop)
 
@@ -115,7 +145,7 @@ these before continuing:**
    cancel the sprint's watchdog schedule. Nothing keeps running across the pause.
 2. **`.ai` updated.** Write current findings, thoughts, eliminated/active pocs,
    open questions, and tasks into the appropriate `.ai` notes; refresh
-   `00-tracking.md` and `05-next-steps.md`.
+   `00-tracking.md`, `05-next-steps.md`, and `07-known-facts.md` when present.
 3. **Brief the user.** Give a short status update and explicitly invite them to
    review the `.ai` folder.
 4. **Offer options + ask how to continue.** Use `ask_user` with concrete choices
@@ -181,10 +211,51 @@ record of everything you've started.
 
 Maintain the `.ai` folder exactly as defined by the `troubleshoot-init` skill
 and `.github/instructions/instructions.md` — that's where the file layout
-(00–06), numbering, dating/signing, "make a note" verbatim rule, assumption
-tracking, and "never delete useful info" conventions live. Don't restate or
+(00–07), numbering, dating/signing, "make a note" verbatim rule, assumption
+tracking, and "never delete useful info" conventions live. `07-known-facts.md`
+is the cross-session reasoning input while an investigation is active:
+concise, relevance-ranked,
+confidence-scored, context-specific, and explicit about what each result does
+and does not prove. Don't restate or
 override them; just follow them. Keep `00-tracking.md` current after every note
 and at session end.
+
+## Evidence discipline
+
+Before interpreting a result, record this provenance tuple:
+
+`(timestamp, environment, host/container, process identity, request/endpoint/SNI, store/cache/network namespace, method/policy, raw result, source)`
+
+- Unknown fields stay unknown; never silently assume equivalence.
+- Maintain an execution-context matrix in `07-known-facts.md` when present.
+- Find the nearest working control and vary one dimension at a time.
+- Prefer whole-layer or whole-branch cuts for human/operator work.
+- Transport success does not prove protocol, chain, revocation, or
+  product-policy success.
+- Require each test to state what it proves and what it does not prove.
+- After two failed causal discriminators or missing request correlation, park
+  the lead until new direct evidence appears.
+
+## Resolution and retrospective gate
+
+Do not call the root cause verified until a positive end-to-end fix test passes
+in the affected product context. Record durability separately if rollout,
+restart, or fresh-container persistence remains open.
+
+Once root cause and the positive end-to-end fix are verified:
+
+1. Consolidate durable closure into 00, 01, and 03: cause, evidence, fix,
+   confidence, impact, and durability gaps. Update working documents only as
+   needed to finish the investigation.
+2. Suggest `/agent troubleshooting-retrospective`.
+3. Explain that it asks not "which magic hindsight question would have solved
+   this," but "what forms of questioning and searching would have discovered
+   the right distinction sooner?"
+4. Do not auto-run it without user approval.
+
+The `.ai` schema is for reaching root cause, not archival. Do not retrofit old
+investigations. After closure, only 00, 01, and 03 are expected to remain useful
+reading; 02, 04, 05, 06, 07, and later notes are working history.
 
 ## Review discipline (when asked to review an investigation)
 
