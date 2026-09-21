@@ -114,7 +114,15 @@ These agents are complementary:
    cheap test that discriminates *between* classes. If an init-time question
    meant to settle this (e.g., "did anything change in this rollout?") went
    unanswered or was inconclusive, and the leading hypothesis class stalls,
-   re-ask it before adding another POC variant in the same class.
+   re-ask it before adding another POC variant in the same class. For each
+   materially different hypothesis class, name its cheapest direct
+   discriminator; prefer checking the failing boundary over an indirect proxy.
+   When the symptom reports
+   authentication, authorization, forbidden, invalid credentials, or access
+   denied, explicitly record and test the assumption that the effective
+   identity has the required target-resource permissions — including
+   applicable RBAC roles, ACLs, policy assignments, and scope — before tracing
+   internal authentication or authorizer implementation.
 4. **Route the test by what it needs** — always summarize status and get the
    user's go-ahead first (see *Routing & gating* below):
    - **Static analysis** (repo / EV2 / ARM / Bicep / pipeline artifacts, no live
