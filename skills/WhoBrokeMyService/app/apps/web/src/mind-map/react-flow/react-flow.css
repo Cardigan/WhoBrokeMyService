@@ -1,0 +1,215 @@
+.mind-map-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--cp-bg-elevated);
+}
+
+.mind-map-canvas .react-flow__controls {
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  box-shadow: var(--cp-shadow);
+  overflow: hidden;
+}
+
+.mind-map-canvas .react-flow__controls-button {
+  background: var(--cp-surface);
+  border-bottom: 1px solid var(--cp-border);
+  color: var(--cp-text);
+}
+
+.mind-map-canvas .react-flow__controls-button:hover {
+  background: var(--cp-surface-soft);
+}
+
+.mind-map-canvas .react-flow__controls-button svg {
+  fill: var(--cp-text);
+}
+
+.mind-map-canvas .react-flow__node {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mind-map-canvas .react-flow__node.dragging {
+  transition: none;
+}
+
+.mind-map-canvas--dragging-subtree .react-flow__node {
+  transition: none;
+}
+
+.mind-map-edge path {
+  stroke: var(--cp-border-strong);
+  stroke-width: 2;
+  transition: stroke 0.2s ease;
+}
+
+.curve-tuner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: color-mix(in srgb, var(--cp-surface) 92%, transparent);
+  color: var(--cp-text);
+  box-shadow: var(--cp-shadow);
+  font-size: 0.75rem;
+}
+
+.curve-tuner input[type="range"] {
+  width: 120px;
+  accent-color: var(--cp-accent);
+}
+
+.curve-tuner__value {
+  width: 56px;
+  padding: 3px 5px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.375rem;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+}
+
+.mind-map-node {
+  width: 220px;
+  min-height: 76px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 2px solid var(--cp-border-strong);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  box-shadow: var(--cp-shadow);
+  cursor: grab;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mind-map-node:focus-within,
+.mind-map-node--selected {
+  border-color: var(--cp-accent);
+  box-shadow: 0 0 0 3px var(--cp-accent-soft), var(--cp-shadow);
+}
+
+.mind-map-node--investigation {
+  border-color: var(--cp-accent);
+  background: color-mix(in srgb, var(--cp-accent) 18%, var(--cp-surface));
+}
+
+.mind-map-node--file {
+  border-color: var(--cp-link);
+  background: color-mix(in srgb, var(--cp-link) 12%, var(--cp-surface));
+}
+
+.mind-map-node--active {
+  border-color: var(--cp-link);
+  background: color-mix(in srgb, var(--cp-link) 14%, var(--cp-surface));
+}
+
+.mind-map-node--supported {
+  border-color: var(--cp-success);
+  background: color-mix(in srgb, var(--cp-success) 14%, var(--cp-surface));
+}
+
+.mind-map-node--refuted {
+  border-color: var(--cp-text-soft);
+  background: color-mix(in srgb, var(--cp-text-soft) 14%, var(--cp-surface));
+}
+
+.mind-map-node--attention {
+  border-color: var(--cp-danger);
+  background: color-mix(in srgb, var(--cp-danger) 14%, var(--cp-surface));
+}
+
+.mind-map-node--superseded {
+  border-color: var(--cp-text-soft);
+  background: color-mix(in srgb, var(--cp-text-soft) 10%, var(--cp-surface));
+}
+
+.mind-map-canvas .react-flow__node.dragging .mind-map-node {
+  box-shadow: 0 10px 28px rgb(0 0 0 / 24%);
+  cursor: grabbing;
+}
+
+.mind-map-node--eliminated {
+  border-left-color: var(--cp-success);
+  background: color-mix(in srgb, var(--cp-success) 12%, var(--cp-surface));
+  opacity: 0.72;
+}
+
+.mind-map-node--eliminated .mind-map-node__label {
+  text-decoration: line-through;
+  text-decoration-color: var(--cp-success);
+}
+
+.mind-map-node__eliminate {
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.mind-map-node__eliminate input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cp-success);
+  cursor: pointer;
+}
+
+.mind-map-node__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mind-map-node__kind,
+.mind-map-node__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--cp-text-muted);
+  text-transform: capitalize;
+}
+
+.mind-map-node__kind {
+  flex: 1;
+}
+
+.mind-map-node__label {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.mind-map-node__status {
+  margin-top: 6px;
+}
+
+.mind-map-node__toggle {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.mind-map-node__toggle:hover {
+  border-color: var(--cp-accent);
+  background: var(--cp-accent-soft);
+}
+
+.mind-map-node__handle {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--cp-border-strong);
+  background: var(--cp-surface);
+}

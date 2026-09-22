@@ -1,0 +1,19 @@
+# Dependencies and generated build output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Logs and local environment
+*.log
+npm-debug.log*
+.env
+.env.local
+
+# Investigation data is external to this toolkit
+.ai/
+!skills/WhoBrokeMyService/app/fixtures/sanitized-investigation/.ai/
+!skills/WhoBrokeMyService/app/fixtures/sanitized-investigation/.ai/**
+
+# OS files
+.DS_Store
+Thumbs.db

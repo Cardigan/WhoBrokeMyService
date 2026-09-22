@@ -1,0 +1,23 @@
+{
+  "name": "ai-mind-map-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build:backend && npm run build --workspace @mind-map-viewer/web",
+    "build:backend": "tsc -b",
+    "test": "npm run build:backend && npm run test:backend && npm run test --workspace @mind-map-viewer/web",
+    "test:backend": "vitest run",
+    "dev": "tsx apps/server/src/cli.ts",
+    "start": "node apps/server/dist/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.11"
+  }
+}

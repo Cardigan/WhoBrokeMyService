@@ -1,0 +1,29 @@
+{
+  "name": "@ai-mind-map/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "ai-mind-map": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsx watch src/cli.ts",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@ai-mind-map/contracts": "0.1.0",
+    "@ai-mind-map/markdown-model": "0.1.0",
+    "@ai-mind-map/mind-map-projection": "0.1.0",
+    "chokidar": "^4.0.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

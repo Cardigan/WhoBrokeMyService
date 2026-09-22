@@ -1,7 +1,7 @@
-# Troubleshooting Toolkit
+# Who Broke My Service
 
 A disciplined, note-keeping troubleshooting workflow for the GitHub Copilot CLI.
-It combines four **skills** with four **agents**. Active investigation state lives
+It combines five **skills** with four **agents**. Active investigation state lives
 in a per-project `.ai` folder so work can pause and resume across sessions and
 models.
 
@@ -17,6 +17,7 @@ models.
 | `skills/troubleshoot-resume` | Skill | Catches a **fresh conversation** up on an **existing** investigation using relevance-ranked known facts. |
 | `skills/troubleshoot-second-opinion` | Skill | Spins up a review agent (user picks the model) to critique the reasoning in the `.ai` folder, update the notes, and report back. |
 | `skills/troubleshoot-code-review-agents` | Skill | Triages open next-steps into "answerable by static code review" vs. not, then dispatches code-review agents to chase the static items and write findings back to `.ai`. |
+| `skills/WhoBrokeMyService` | Skill | Builds and starts an interactive mind-map visualization of a project's `.ai` investigation. |
 
 ## How they fit together
 
@@ -26,6 +27,7 @@ troubleshooter (agent)
   ├── resuming?         → troubleshoot-resume
   ├── stuck / high-stakes? → troubleshoot-second-opinion
   ├── static-analysis work? → troubleshoot-code-review-agents
+  ├── visualize notes?   → WhoBrokeMyService
   ├── conflicting evidence? → troubleshooting-context-auditor
   ├── working comparison?   → troubleshooting-control-diff
   └── verified resolution?  → troubleshooting-retrospective
@@ -63,7 +65,8 @@ Clone https://github.com/Cardigan/TroubleshooterAgent and install its
 troubleshooting toolkit into my Copilot CLI so it's available to me.
 
 The repo contains:
-- `skills/` — four `troubleshoot-*` skills, each its own folder with a SKILL.md
+- `skills/` — four `troubleshoot-*` skills plus the `WhoBrokeMyService`
+  visualization skill, each in its own folder with a `SKILL.md`
 - `agents/` — the troubleshooter plus three specialist agents
 - `.github/instructions/instructions.md` — `.ai` folder conventions the agent
   and skills rely on
@@ -101,6 +104,8 @@ Copy-Item -Force          .\agents\*  "$env:USERPROFILE\.copilot\agents\"
   (`troubleshoot-second-opinion`).
 - **Chase static items:** ask which next-steps can be answered by code review
   (`troubleshoot-code-review-agents`).
+- **Visualize an investigation:** run `/WhoBrokeMyService [project-or-.ai-path]`
+  to build and start the local interactive mind-map viewer.
 - **Audit context equivalence:** invoke `troubleshooting-context-auditor`.
 - **Find the nearest working control:** invoke `troubleshooting-control-diff`.
 - **Review the process after a verified fix:** invoke
@@ -118,3 +123,7 @@ Copy-Item -Force          .\agents\*  "$env:USERPROFILE\.copilot\agents\"
   are all defined in `agents/troubleshooter.md`.
 - `07-known-facts.md` is the active investigation's relevance-ranked evidence
   index. Legacy investigations are not retrofitted.
+- `WhoBrokeMyService` requires Node.js and npm. Its application, dependencies,
+  and generated build output live inside the installed skill. Investigation
+  Markdown remains in the selected external `.ai` folder and is never copied
+  into this repository.
