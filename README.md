@@ -61,7 +61,7 @@ The easiest way to install is to let Copilot CLI do it for you. Open the
 GitHub Copilot CLI and paste this prompt:
 
 ```text
-Clone https://github.com/Cardigan/TroubleshooterAgent and install its
+Clone https://github.com/Cardigan/WhoBrokeMyService and install its
 troubleshooting toolkit into my Copilot CLI so it's available to me.
 
 The repo contains:
@@ -84,8 +84,8 @@ If you'd rather do it by hand, clone the repo and copy the components into your
 Copilot CLI config directory:
 
 ```powershell
-git clone https://github.com/Cardigan/TroubleshooterAgent
-cd TroubleshooterAgent
+git clone https://github.com/Cardigan/WhoBrokeMyService
+cd WhoBrokeMyService
 
 # User-level (applies everywhere)
 Copy-Item -Recurse -Force .\skills\*  "$env:USERPROFILE\.copilot\skills\"
